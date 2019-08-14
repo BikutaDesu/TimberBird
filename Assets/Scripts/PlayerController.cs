@@ -5,8 +5,10 @@ using UnityEngine;
 public class PlayerController : MonoBehaviour
 {
 
-    private Animator playerAnimator;
+    public float cutDelay = 1;
+    private float nextCut;
 
+    private Animator playerAnimator;
     private float playerHorizontalScale;
 
     // Start is called before the first frame update
@@ -14,13 +16,16 @@ public class PlayerController : MonoBehaviour
     {
         playerHorizontalScale = transform.localScale.x;
         playerAnimator = GetComponent<Animator>();
+        nextCut = cutDelay;
     }
 
     // Update is called once per frame
     void Update()
     {
-        if (Input.GetButtonDown("Fire1"))
+        nextCut -= Time.deltaTime;
+        if (Input.GetButtonDown("Fire1") && nextCut <= 0)
         {
+            nextCut = cutDelay;
             Cut();
         }
     }
@@ -29,12 +34,12 @@ public class PlayerController : MonoBehaviour
     {
         if (Input.mousePosition.x > Screen.width / 2)
         {
-            transform.position = new Vector2(1.5f, -2);
+            transform.position = new Vector2(1.3f, -3.5f);
             transform.localScale = new Vector2(-playerHorizontalScale, transform.localScale.y);
         }
         else
         {
-            transform.position = new Vector2(-1.5f, -2);
+            transform.position = new Vector2(-1.3f, -3.5f);
             transform.localScale = new Vector2(playerHorizontalScale, transform.localScale.y);
         }
         playerAnimator.ResetTrigger("Cut");
