@@ -5,7 +5,7 @@ using UnityEngine;
 public class PlayerController : MonoBehaviour
 {
 
-    public float cutDelay = 0.4f;
+    public float cutDelay = 0.6f;
     private float nextCut;
     private float playerHorizontalScale;
     private int playerDirection = 1;
@@ -14,6 +14,8 @@ public class PlayerController : MonoBehaviour
     private GameController gameControllerScript;
     private SpriteRenderer playerSpriteRenderer;
     private Rigidbody2D playerRigidbody;
+
+    public AudioClip cutSound;
 
     // Start is called before the first frame update
     void Start()
@@ -24,20 +26,25 @@ public class PlayerController : MonoBehaviour
         playerSpriteRenderer = GetComponent<SpriteRenderer>();
         gameControllerScript = GameObject.Find("_GC").GetComponent<GameController>();
         nextCut = cutDelay;
-        if (!gameControllerScript.isStarted && !gameControllerScript.isOver) gameControllerScript.isStarted = true; 
     }
 
     // Update is called once per frame
     void Update()
     {
         nextCut -= Time.deltaTime;
-        if (gameControllerScript.isStarted)
+        if (Input.GetButtonDown("Fire1") && Time.time > nextCut)
         {
-            if (Input.GetButtonDown("Fire1") && nextCut <= 0)
+            if (gameControllerScript.isStarted)
             {
-                nextCut = cutDelay;
+                nextCut = Time.time + cutDelay;
                 Cut();
-            }    
+            }else if (!gameControllerScript.isOver && !gameControllerScript.isStarted)
+            {
+                gameControllerScript.isStarted = true;
+                nextCut = Time.time + cutDelay;
+                Cut();
+            }
+                
         }
     }
 
@@ -60,6 +67,7 @@ public class PlayerController : MonoBehaviour
 
         playerAnimator.ResetTrigger("Cut");
         playerAnimator.SetTrigger("Cut");
+        gameControllerScript.Play(cutSound);
         
         Invoke("ResetAnimation", 0.6f);
     }

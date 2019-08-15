@@ -9,6 +9,9 @@ public class GameController : MonoBehaviour
 
     public GameObject enemyPrefab;
     public GameObject barrelPrefab;
+    public AudioClip gameOverSound;
+
+    public AudioSource audioSource;
 
     public Text txtScore;
 
@@ -23,18 +26,50 @@ public class GameController : MonoBehaviour
     public bool isStarted = false;
     public bool isOver = false;
 
+    public Image timeBar;
+    private float barScale;
+        
+
     void Start()
     {
         enemiesList = new List<GameObject>();
         txtScore.text = "TOQUE PARA INICIAR!!";
         txtScore.alignment = TextAnchor.MiddleCenter;
+        audioSource = GetComponent<AudioSource>();
         player = GameObject.FindGameObjectWithTag("Player");
+        barScale = timeBar.GetComponent<RectTransform>().localScale.x;
         CreateEnemies();
     }
 
     void Update()
     {
-        
+        DecreaseBar();
+    }
+
+    void IncreaseBar()
+    {
+        barScale += 0.2f;
+        timeBar.GetComponent<RectTransform>().localScale = new Vector2(barScale, 1.0f);
+        if (barScale >= 1)
+        {
+            barScale = 1;
+        }
+    }
+
+    void DecreaseBar()
+    {
+        if (isStarted)
+        {
+            if (barScale > 0.01f)
+            {
+                barScale -= 0.15f * Time.deltaTime;
+                timeBar.GetComponent<RectTransform>().localScale = new Vector2(barScale, 1.0f);
+            }
+            else
+            {
+                GameOver();
+            }       
+        }
     }
 
     void CreateEnemies()
@@ -97,14 +132,20 @@ public class GameController : MonoBehaviour
             }
             else
             {
-                playerScore++;
+                AddScore();
             }
         }
         else
         {
-            playerScore++;
+            AddScore();
         }
         txtScore.text = "SCORE: " + playerScore;
+    }
+
+    void AddScore()
+    {
+        playerScore++;
+        IncreaseBar();
     }
 
     public void GameOver()
@@ -112,11 +153,18 @@ public class GameController : MonoBehaviour
         isOver = true;
         isStarted = false;
         player.GetComponent<PlayerController>().Death();
+        txtScore.text = "GAME OVER";
+        Play(gameOverSound);
         Invoke("RestartScene", 2.0f);
     }
 
     void RestartScene()
     {
         SceneManager.LoadScene("SampleScene",LoadSceneMode.Single);
+    }
+
+    public void Play(AudioClip audio)
+    {
+        audioSource.PlayOneShot(audio);
     }
 }
