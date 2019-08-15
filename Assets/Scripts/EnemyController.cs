@@ -6,6 +6,7 @@ public class EnemyController : MonoBehaviour
 {
 
     private Animator enemyAnimator;
+    private Rigidbody2D enemyRigidBody;
 
     private float enemyHorizontalScale;
     
@@ -13,7 +14,11 @@ public class EnemyController : MonoBehaviour
     {
         enemyHorizontalScale = transform.localScale.x;
         enemyAnimator = GetComponent<Animator>();
-        SortEnemy();
+        enemyRigidBody = GetComponent<Rigidbody2D>();
+        if (this.tag != "Barrel")
+        {
+            SortEnemy();    
+        }
     }
 
     void Update()
@@ -35,5 +40,27 @@ public class EnemyController : MonoBehaviour
             }
             enemyAnimator.SetTrigger("Attack");
         }
+        else
+        {
+            this.tag = "Barrel";
+        }
+    }
+
+    public void TakeDamage(int direction)
+    {
+        enemyRigidBody.velocity = new Vector2((direction) * 10, 2);
+        enemyRigidBody.isKinematic = false;
+        enemyRigidBody.AddTorque((-direction) * 50.0f);
+        if (this.tag == "Enemy")
+        {
+            enemyAnimator.ResetTrigger("Attack");
+            enemyAnimator.SetTrigger("Death");
+        }
+        Invoke("DestroyEnemy", 2.0f);
+    }
+
+    void DestroyEnemy()
+    {
+        Destroy(this.gameObject);
     }
 }
